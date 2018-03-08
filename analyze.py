@@ -24,6 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-n_jobs',action='store',dest='N_JOBS',default=4,type=int,help='Number of parallel jobs')
     parser.add_argument('-n_combos',action='store',dest='N_COMBOS',default=4,type=int,help='Number of hyperparameters to try')
     parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,help='random state')
+    #parser.add_argument('-target',action='store',dest='TARGET',default='class',type=str,help='name of target / endpoint/ dependent variable')    
     
     args = parser.parse_args()
       
@@ -58,13 +59,14 @@ if __name__ == '__main__':
         #feat_file =  save_file.split('.')[0]+'_imp_score.csv'        
         with open(save_file,'w') as out:
             if args.PREP:
-                out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\t\taccuracy\tf1_macro\tbal_accuracy\n')
+                out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\taccuracy\tf1_macro\tbal_accuracy\n')
             else:
                 out.write('dataset\talgorithm\tparameters\taccuracy\tf1_macro\tseed\tbal_accuracy\n')
         
     # write run commands
     all_commands = []
     for ml in learners:
+        save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
         if args.PREP: 
             all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP)) 
         else :

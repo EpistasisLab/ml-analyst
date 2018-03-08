@@ -2,12 +2,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-#from sklearn.preprocessing import Binarizer, MaxAbsScaler, MinMaxScaler
-#from sklearn.preprocessing import Normalizer, PolynomialFeatures, RobustScaler, StandardScaler
-#from sklearn.decomposition import FastICA, PCA
-#from sklearn.kernel_approximation import RBFSampler, Nystroem
-#from sklearn.cluster import FeatureAgglomeration
-#from sklearn.feature_selection import SelectFwe, SelectPercentile, VarianceThreshold
 from sklearn.feature_selection import SelectFromModel, RFE
 from sklearn.ensemble import ExtraTreesClassifier
 
@@ -15,6 +9,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from evaluate_model import evaluate_model
 from preprocessors import preprocessor_dict
 
+# inputs
 dataset = sys.argv[1]
 save_file = sys.argv[2]
 num_param_combinations = int(sys.argv[3])
@@ -22,6 +17,7 @@ random_seed = int(sys.argv[4])
 preps = sys.argv[5]
 np.random.seed(random_seed)
 
+# construct pipeline
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
@@ -31,8 +27,10 @@ for p in preps.split(','):
     elif pipeline_components[-1] is RFE:
         pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
+
 pipeline_components.append(AdaBoostClassifier)
 
+# parameters for method
 learning_rate_values = np.random.uniform(low=1e-10, high=5., size=num_param_combinations)
 n_estimators_values = np.random.choice(list(range(50, 1001, 50)), size=num_param_combinations)
 
@@ -41,4 +39,5 @@ pipeline_parameters[AdaBoostClassifier] = [{'learning_rate': learning_rate, 'n_e
                                     for (learning_rate, n_estimators) in all_param_combinations]
 
 
+#evaluate
 evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
