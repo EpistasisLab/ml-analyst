@@ -55,13 +55,13 @@ if __name__ == '__main__':
     for ml in learners:
         #write headers
         save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
-        
+        #feat_file =  save_file.split('.')[0]+'_imp_score.csv'        
         with open(save_file,'w') as out:
             if args.PREP:
                 out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\t\taccuracy\tf1_macro\tbal_accuracy\n')
             else:
                 out.write('dataset\talgorithm\tparameters\taccuracy\tf1_macro\tseed\tbal_accuracy\n')
-
+        
     # write run commands
     all_commands = []
     for ml in learners:
