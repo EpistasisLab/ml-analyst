@@ -37,7 +37,7 @@ n_estimators_values = np.random.choice(list(range(50, 1001, 50)), size=num_param
 min_impurity_decrease_values = np.random.exponential(scale=0.01, size=num_param_combinations)
 max_features_values = np.random.choice(list(np.arange(0.01, 1., 0.01)) + ['sqrt', 'log2', None], size=num_param_combinations)
 criterion_values = np.random.choice(['gini', 'entropy'], size=num_param_combinations)
-max_depth_values = np.random.choice(list(range(1, 51)) + [None], size=num_param_combinations)
+max_depth_values = np.random.choice(list(range(1, 21)) + [None], size=num_param_combinations)
 
 all_param_combinations = zip(n_estimators_values, min_impurity_decrease_values, max_features_values, criterion_values, max_depth_values)
 pipeline_parameters[RandomForestClassifier] = \

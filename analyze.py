@@ -14,17 +14,26 @@ if __name__ == '__main__':
                         'target/label column is labeled as "class".')    
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
-    parser.add_argument('-learners', action='store', dest='LEARNERS',default=None,type=str, help='Comma-separated list of ML methods to use (should correspond to a py file name in learners/)')
-    parser.add_argument('-prep', action='store', dest='PREP', default=None, type=str, help = 'Comma-separated list of preprocessors to apply to data')
-    parser.add_argument('--lsf', action='store_true', dest='LSF', default=False, help='Run on an LSF HPC (using bsub commands)')
-    parser.add_argument('-metric',action='store', dest='METRIC', default='f1_macro', type=str, help='Metric to compare algorithms')
-    parser.add_argument('-k',action='store', dest='K', default=5, type=int, help='Number of folds for cross validation')
-    parser.add_argument('-search',action='store',dest='SEARCH',default='random',choices=['grid','random'],help='Hyperparameter search strategy')
-    parser.add_argument('--r',action='store_true',dest='REGRESSION',default=False,help='Run regression instead of classification.')
-    parser.add_argument('-n_jobs',action='store',dest='N_JOBS',default=4,type=int,help='Number of parallel jobs')
-    parser.add_argument('-n_combos',action='store',dest='N_COMBOS',default=4,type=int,help='Number of hyperparameters to try')
-    parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,help='random state')
-    #parser.add_argument('-target',action='store',dest='TARGET',default='class',type=str,help='name of target / endpoint/ dependent variable')    
+    parser.add_argument('-learners', action='store', dest='LEARNERS',default=None,type=str, 
+            help='Comma-separated list of ML methods to use (should correspond to a py file name in learners/)')
+    parser.add_argument('-prep', action='store', dest='PREP', default=None, type=str, 
+            help = 'Comma-separated list of preprocessors to apply to data')
+    parser.add_argument('--lsf', action='store_true', dest='LSF', default=False, 
+            help='Run on an LSF HPC (using bsub commands)')
+    parser.add_argument('-metric',action='store', dest='METRIC', default='f1_macro', type=str, 
+            help='Metric to compare algorithms')
+    parser.add_argument('-k',action='store', dest='K', default=5, type=int, 
+            help='Number of folds for cross validation')
+    parser.add_argument('-search',action='store',dest='SEARCH',default='random',choices=['grid','random'],
+            help='Hyperparameter search strategy')
+    parser.add_argument('--r',action='store_true',dest='REGRESSION',default=False,
+            help='Run regression instead of classification.')
+    parser.add_argument('-n_jobs',action='store',dest='N_JOBS',default=4,type=int,
+            help='Number of parallel jobs')
+    parser.add_argument('-n_combos',action='store',dest='N_COMBOS',default=4,type=int,
+            help='Number of hyperparameters to try')
+    parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,
+            help='random state')
     
     args = parser.parse_args()
       
@@ -56,10 +65,15 @@ if __name__ == '__main__':
     for ml in learners:
         #write headers
         save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
-        feat_file =  save_file.split('.')[0]+'_imp_score.csv'        
-        with open(save_file.split('.')[0] + '_imp_scores.csv','w') as out:
+        feat_file =  save_file.split('.')[0]+'.imp_score'        
+        roc_file =  save_file.split('.')[0]+'.roc'        
+        
+        with open(save_file.split('.')[0] + '.imp_score','w') as out:
             out.write('algorithm\tseed\tfeature\tscore\n')
-            
+         
+        with open(save_file.split('.')[0] + '.roc','w') as out:
+            out.write('algorithm\tseed\tfpr\ttpr\tauc\n')
+   
         with open(save_file,'w') as out:
             if args.PREP:
                 out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\taccuracy\tf1_macro\tbal_accuracy\n')
