@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import argparse
 from glob import glob
-import pdb 
-
+import pdb
 def main():
     """Analyzes results and generates figures."""
  
@@ -32,8 +31,6 @@ def main():
 
     df = pd.concat(frames, join='outer', ignore_index=True)
 
-    pdb.set_trace()
-
     print('loaded',count,'result files with results from these learners:',df['algorithm'].unique())
 
     restricted_cols = ['preprocessor', 'prep-parameters', 'algorithm', 'alg-parameters','dataset',
@@ -51,9 +48,31 @@ def main():
         #plt.ylim(0.5,1.0)
         plt.xlabel('')
         plt.tight_layout() 
-        plt.savefig('_'.join([run_dir, dataset, col,'boxplots.pdf']))
+        plt.savefig(run_dir + '_'.join([ dataset, col,'boxplots.pdf']))
     
-    print('done.') 
-    
+
+    # feature importance plots
+    frames = []     # data frames to combine
+    count = 0
+    for f in glob(run_dir + '*.csv'):
+        if 'imp_scores' in f:
+            frames.append(pd.read_csv(f,sep='\t',index_col=False))
+            count = count + 1
+
+    df = pd.concat(frames, join='outer', ignore_index=True)
+
+
+    print('loaded',count,'feature importance files with results from these learners:',df['algorithm'].unique())
+
+    dfp =  df.groupby(['algorithm','feature']).median().unstack('algorithm')
+
+    h = dfp['score'].plot(kind='bar', stacked=True, sort_columns=True)
+    leg = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+    plt.ylabel('Importance Score')
+    plt.savefig(run_dir + '_'.join([ dataset, col,'importance_scores.pdf']),bbox_extra_artists=(leg,h), bbox_inches='tight')
+
+    print('done.')    
+
 if __name__ == '__main__':
     main()

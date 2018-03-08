@@ -56,7 +56,10 @@ if __name__ == '__main__':
     for ml in learners:
         #write headers
         save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
-        #feat_file =  save_file.split('.')[0]+'_imp_score.csv'        
+        feat_file =  save_file.split('.')[0]+'_imp_score.csv'        
+        with open(save_file.split('.')[0] + '_imp_scores.csv','w') as out:
+            out.write('algorithm\tseed\tfeature\tscore\n')
+            
         with open(save_file,'w') as out:
             if args.PREP:
                 out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\taccuracy\tf1_macro\tbal_accuracy\n')

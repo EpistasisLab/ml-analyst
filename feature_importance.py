@@ -6,18 +6,22 @@ import matplotlib.pyplot as plt
 def feature_importance(save_file, model, feature_names, training_features, training_classes, random_state):
     """ prints feature importance information for a trained estimator (model)"""
     coefs = compute_imp_score(model, training_features, training_classes, random_state)
-    plot_imp_score(save_file, coefs, feature_names, random_state)
-     
-    out_text = '\t'.join([save_file.split('/')[-1][:-4],    # model name
-                          str(random_state)]                 # trial (seed)
-                         + [str(i) for i in coefs])
+#    plot_imp_score(save_file, coefs, feature_names, random_state)
 
+    out_text=''
+    # algorithm seed    feature score
+    for i,c in enumerate(coefs):
+        out_text += '\t'.join([save_file.split('/')[-1][:-4],    # model name
+                              str(random_state),
+                              feature_names[i],
+                              str(c)])+'\n'
+        
     with open(save_file.split('.')[0] + '_imp_scores.csv','a') as out:
         out.write(out_text+'\n')
 
 def compute_imp_score(model, training_features, training_classes, random_state):
     if hasattr(model, 'coef_'):
-        coefs = model.coef_
+        coefs = np.abs(model.coef_)
     else:
         coefs = getattr(model, 'feature_importances_', None)
     if coefs is None:
@@ -33,7 +37,7 @@ def compute_imp_score(model, training_features, training_classes, random_state):
     if coefs.ndim > 1:
         coefs = safe_sqr(coefs).sum(axis=0)
 
-    return coefs
+    return (coefs-np.min(coefs))/(np.max(coefs)-np.min(coefs))
 
 def plot_imp_score(save_file, coefs, feature_names, seed):
     # plot bar charts for top 10 importanct features
