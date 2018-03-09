@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description="An analyst for quick ML applications.",
                                      add_help=False)
   
-    parser.add_argument('-name', action='store', dest='NAME', type=str, help='Data file that was analyzed; ensure that the '
+    parser.add_argument('NAME', action='store',  type=str, help='Data file that was analyzed; ensure that the '
                         'results have been generated in results/[filename].')    
 
     args = parser.parse_args()
@@ -61,11 +61,11 @@ def main():
         count = count + 1
 
     df = pd.concat(frames, join='outer', ignore_index=True)
+    df['prep_alg'] = df['preprocessor'] + '_' + df['algorithm']
+    # pdb.set_trace()
+    print('loaded',count,'feature importance files with results from these learners:',df['prep_alg'].unique())
 
-
-    print('loaded',count,'feature importance files with results from these learners:',df['algorithm'].unique())
-
-    dfp =  df.groupby(['algorithm','feature']).median().unstack('algorithm')
+    dfp =  df.groupby(['prep_alg','feature']).median().unstack('prep_alg')
 
     h = dfp['score'].plot(kind='bar', stacked=True, sort_columns=True)
     leg = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -81,14 +81,16 @@ def main():
         count = count + 1
 
     df = pd.concat(frames, join='outer', ignore_index=True)
+    df['prep_alg'] = df['preprocessor'] + '_' + df['algorithm']
     
-    print('loaded',count,'roc files with results from these learners:',df['algorithm'].unique())
+    print('loaded',count,'roc files with results from these learners:',df['prep_alg'].unique())
+
 
     plt.figure()
     plt.plot([0, 1],[0, 1],'--k')
     colors = ('r','y','b','g','c','k')
-    n_algs = len(df['algorithm'].unique())
-    for i, (alg,df_g) in enumerate(df.groupby('algorithm')):
+    n_algs = len(df['prep_alg'].unique())
+    for i, (alg,df_g) in enumerate(df.groupby('prep_alg')):
     
         auc = df_g.auc.median()
         tpr  = [df_g.tpr.values[s] for s in np.argsort(df_g.fpr.values)]

@@ -3,28 +3,36 @@ from read_file import read_file
 from eli5.sklearn import PermutationImportance
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
+import pdb
 
-def feature_importance(save_file, model, feature_names, training_features, training_classes, random_state):
+def feature_importance(save_file, model, model_name, feature_names, training_features, training_classes, random_state,
+                       preps, prep_params, clf_name, clf_params):
     """ prints feature importance information for a trained estimator (model)"""
-    coefs = compute_imp_score(model, training_features, training_classes, random_state)
+    coefs = compute_imp_score(model, model_name, training_features, training_classes, random_state)
 #    plot_imp_score(save_file, coefs, feature_names, random_state)
 
     out_text=''
     # algorithm seed    feature score
     for i,c in enumerate(coefs):
-        out_text += '\t'.join([save_file.split('/')[-1][:-4],    # model name
-                              str(random_state),
-                              feature_names[i],
-                              str(c)])+'\n'
+        out_text += '\t'.join([preps,
+                               prep_params,
+                               clf_name,
+                               clf_params,
+                               str(random_state),
+                               feature_names[i],
+                               str(c)])+'\n'
         
     with open(save_file.split('.')[0] + '.imp_score','a') as out:
         out.write(out_text)
 
-def compute_imp_score(model, training_features, training_classes, random_state):
-    if hasattr(model, 'coef_'):
-        coefs = np.abs(model.coef_)
+def compute_imp_score(model, model_name, training_features, training_classes, random_state):
+    clf = model.named_steps[model_name]    
+    # pdb.set_trace()
+    if hasattr(clf, 'coef_'):
+        coefs = np.abs(clf.coef_.flatten())
+
     else:
-        coefs = getattr(model, 'feature_importances_', None)
+        coefs = getattr(clf, 'feature_importances_', None)
     if coefs is None:
         perm = PermutationImportance(
                                     estimator=model,
@@ -35,9 +43,7 @@ def compute_imp_score(model, training_features, training_classes, random_state):
         perm.fit(training_features, training_classes)
         coefs = perm.feature_importances_
 
-    if coefs.ndim > 1:
-        coefs = safe_sqr(coefs).sum(axis=0)
-
+    
     return (coefs-np.min(coefs))/(np.max(coefs)-np.min(coefs))
 
 # def plot_imp_score(save_file, coefs, feature_names, seed):
@@ -54,7 +60,7 @@ def compute_imp_score(model, training_features, training_classes, random_state):
 
 ######################################################################################### ROC Curve
 
-def roc(save_file, model, y_true, probabilities, random_state):
+def roc(save_file, model, y_true, probabilities, random_state, preps, prep_params, clf_name, clf_params):
     """prints receiver operator chacteristic curve data"""
 
     fpr,tpr,_ = roc_curve(y_true, probabilities)
@@ -64,11 +70,14 @@ def roc(save_file, model, y_true, probabilities, random_state):
     # print results
     out_text=''
     for f,t in zip(fpr,tpr):
-        out_text += '\t'.join([model_name,
-                          str(random_state),
-                          str(f),
-                          str(t),
-                          str(AUC)])+'\n'
+        out_text += '\t'.join([preps,
+                               prep_params,
+                               clf_name,
+                               clf_params,
+                               str(random_state),
+                               str(f),
+                               str(t),
+                               str(AUC)])+'\n'
 
     with open(save_file.split('.')[0] + '.roc','a') as out:
         out.write(out_text)

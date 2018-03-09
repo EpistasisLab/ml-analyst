@@ -69,10 +69,10 @@ if __name__ == '__main__':
         roc_file =  save_file.split('.')[0]+'.roc'        
         
         with open(save_file.split('.')[0] + '.imp_score','w') as out:
-            out.write('algorithm\tseed\tfeature\tscore\n')
+            out.write('preprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\tfeature\tscore\n')
          
         with open(save_file.split('.')[0] + '.roc','w') as out:
-            out.write('algorithm\tseed\tfpr\ttpr\tauc\n')
+            out.write('preprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\tfpr\ttpr\tauc\n')
    
         with open(save_file,'w') as out:
             if args.PREP:

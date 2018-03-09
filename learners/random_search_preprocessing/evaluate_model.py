@@ -14,21 +14,19 @@ from read_file import read_file
 from utils import feature_importance , roc
 
 def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeline_parameters):
-    print('in evaluate_model...')
 
     features, labels, feature_names = read_file(dataset)
 
     pipelines = [dict(zip(pipeline_parameters.keys(), list(parameter_combination)))
                  for parameter_combination in itertools.product(*pipeline_parameters.values())]
 
-    print('pipelines:',pipelines)
     # Create a temporary folder to store the transformers of the pipeline
     cachedir = mkdtemp()
     memory = Memory(cachedir=cachedir, verbose=0)
 
     with warnings.catch_warnings():
         # Squash warning messages. Turn this off when debugging!
-    #    warnings.simplefilter('ignore')
+        warnings.simplefilter('ignore')
 
         for pipe_parameters in pipelines:
             pipeline = []
@@ -40,9 +38,9 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
                     pipeline.append(component())
 
             try:
-                print('make_pipeline..')
                 clf = make_pipeline(*pipeline, memory=memory)
-                cv_predictions = cross_val_predict(estimator=clf, X=features, y=labels, cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=random_state))
+                cv_predictions = cross_val_predict(estimator=clf, X=features, y=labels, cv=StratifiedKFold(n_splits=10, 
+                    shuffle=True, random_state=random_state))
                 est = clf.fit(features,labels)
 
                 # get cv probabilities
@@ -55,7 +53,8 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
                     skip = True
                     
                 if not skip:
-                    cv_probabilities = cross_val_predict(estimator=clf, X=features, y=labels, method=method, cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=random_state))
+                    cv_probabilities = cross_val_predict(estimator=clf, X=features, y=labels, method=method, 
+                                                        cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=random_state))
                     if method == "predict_proba":
                         cv_probabilities = cv_probabilities[:,1]
 
@@ -96,9 +95,10 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
             sys.stdout.flush()
             
             # write feature importances
-            feature_importance(save_file, est, feature_names, features, labels, random_state)
+            est_name = classifier_class.__name__.lower()
+            feature_importance(save_file, est, est_name, feature_names, features, labels, random_state, ','.join(preprocessor_classes), preprocessor_param_string,classifier_class.__name__, param_string)
             # write roc curves
             if not skip:
-                roc(save_file, est, labels, cv_probabilities, random_state)
+                roc(save_file, est, labels, cv_probabilities, random_state, ','.join(preprocessor_classes), preprocessor_param_string,classifier_class.__name__, param_string)
     # Delete the temporary cache before exiting
     rmtree(cachedir)
