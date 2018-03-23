@@ -14,7 +14,7 @@ if __name__ == '__main__':
                         'target/label column is labeled as "class".')    
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
-    parser.add_argument('-learners', action='store', dest='LEARNERS',default=None,type=str, 
+    parser.add_argument('-ml', action='store', dest='LEARNERS',default=None,type=str, 
             help='Comma-separated list of ML methods to use (should correspond to a py file name in learners/)')
     parser.add_argument('-prep', action='store', dest='PREP', default=None, type=str, 
             help = 'Comma-separated list of preprocessors to apply to data')
@@ -64,7 +64,10 @@ if __name__ == '__main__':
     # initialize output files
     for ml in learners:
         #write headers
-        save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
+        if args.PREP:
+            save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
+        else:
+            save_file = results_path + '_' + ml + '.csv'  
         feat_file =  save_file.split('.')[0]+'.imp_score'        
         roc_file =  save_file.split('.')[0]+'.roc'        
         
@@ -83,7 +86,11 @@ if __name__ == '__main__':
     # write run commands
     all_commands = []
     for ml in learners:
-        save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
+        if args.PREP:
+            save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
+        else:
+            save_file = results_path + '_' + ml + '.csv'          
+        
         if args.PREP: 
             all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP)) 
         else :

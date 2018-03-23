@@ -63,6 +63,7 @@ def compute_imp_score(model, model_name, training_features, training_classes, ra
 def roc(save_file, model, y_true, probabilities, random_state, preps, prep_params, clf_name, clf_params):
     """prints receiver operator chacteristic curve data"""
 
+    pdb.set_trace()
     fpr,tpr,_ = roc_curve(y_true, probabilities)
 
     AUC = auc(fpr,tpr)

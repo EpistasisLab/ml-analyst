@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pdb
 
 def read_file(filename, sep=None):
     
@@ -21,5 +22,7 @@ def read_file(filename, sep=None):
 
     X = input_data.drop('class', axis=1).values.astype(float)
     y = input_data['class'].values
+
+    assert(X.shape[1] == feature_names.shape[0])
 
     return X, y, feature_names

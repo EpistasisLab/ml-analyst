@@ -13,15 +13,16 @@ def main():
     parser = argparse.ArgumentParser(description="An analyst for quick ML applications.",
                                      add_help=False)
   
-    parser.add_argument('NAME', action='store',  type=str, help='Data file that was analyzed; ensure that the '
-                        'results have been generated in results/[filename].')    
+    parser.add_argument('RUN_DIR', action='store',  type=str, help='Path to results from analysis.')    
 
     args = parser.parse_args()
    
-    dataset = args.NAME
-    # dataset = args.INPUT_FILE.split('/')[-1].split('.')[0] 
-    run_dir = 'results/' + dataset + '/' 
-
+    # dataset = args.NAME
+    # dataset = args.NAME.split('/')[-1].split('.')[0] 
+    # run_dir = 'results/' + dataset + '/' 
+    run_dir = '/'.join(args.RUN_DIR.split('/'))+'/'
+    dataset = run_dir.split('/')[-2]
+    print('dataset:',dataset)
     print('loading data from',run_dir)
 
     frames = []     # data frames to combine
