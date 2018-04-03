@@ -30,6 +30,8 @@ if __name__ == '__main__':
             help='Run regression instead of classification.')
     parser.add_argument('-n_jobs',action='store',dest='N_JOBS',default=4,type=int,
             help='Number of parallel jobs')
+    parser.add_argument('-n_trials',action='store',dest='N_TRIALS',default=1,type=int,
+            help='Number of parallel jobs')
     parser.add_argument('-n_combos',action='store',dest='N_COMBOS',default=4,type=int,
             help='Number of hyperparameters to try')
     parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,
@@ -85,19 +87,21 @@ if __name__ == '__main__':
         
     # write run commands
     all_commands = []
-    for ml in learners:
-        if args.PREP:
-            save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
-        else:
-            save_file = results_path + '_' + ml + '.csv'          
-        
-        if args.PREP: 
-            all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP)) 
-        else :
-            all_commands.append('python {ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state))
+    for t in range(args.N_TRIALS):
+        random_state = np.random.randint(2**32-1)
+        for ml in learners:
+            if args.PREP:
+                save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
+            else:
+                save_file = results_path + '_' + ml + '.csv'          
+            
+            if args.PREP: 
+                all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP)) 
+            else :
+                all_commands.append('python {ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state))
 
     if args.LSF:    # bsub commands
-        for ml in learners:
+        for run_cmd in all_commands:
             job_name = ml + '_' + dataset
             out_file = results_path + job_name + '_%J.out'
             error_file = out_file[:-4] + '.err'
@@ -109,9 +113,8 @@ if __name__ == '__main__':
                                              QUEUE=args.QUEUE,
                                              N_CORES=n_cores)
             
-            bsub_cmd +=  '"' + all_commands[i] + '"'
-
-            os.system(bsub_cmd)     # submit jobs
-    
+            bsub_cmd +=  '"' + run_cmd + '"'
+            print(bsub_cmd)
+            os.system(bsub_cmd)     # submit jobs 
     else:   # run locally  
         Parallel(n_jobs=args.N_JOBS)(delayed(os.system)(run_cmd) for run_cmd in all_commands )

@@ -20,14 +20,14 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(ExtraTreesClassifier )
+pipeline_components.append('ExtraTreesClassifier', ExtraTreesClassifier ())
 
 
 n_estimators_values = np.random.choice(list(range(50, 1001, 50)), size=num_param_combinations)
@@ -36,10 +36,9 @@ max_features_values = np.random.choice(list(np.arange(0.01, 1., 0.01)) + ['sqrt'
 criterion_values = np.random.choice(['gini', 'entropy'], size=num_param_combinations)
 max_depth_values = np.random.choice(list(range(1, 51)) + [None], size=num_param_combinations)
 
-all_param_combinations = zip(n_estimators_values, min_impurity_decrease_values, max_features_values, criterion_values, max_depth_values)
-pipeline_parameters[ExtraTreesClassifier] = \
-   [{'n_estimators': n_estimators, 'min_impurity_decrease': min_impurity_decrease, 'max_features': max_features, 'criterion': criterion, 'max_depth': max_depth, 'random_state': 324089}
-     for (n_estimators, min_impurity_decrease, max_features, criterion, max_depth) in all_param_combinations]
+pipeline_parameters['ExtraTreesClassifier'] = \ 
+   {'n_estimators': n_estimators_values, 'min_impurity_decrease': min_impurity_decrease_values, 'max_features': max_features_values, 'criterion': criterion_values, 'max_depth': max_depth_values, 'random_state': 324089}
+     
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)

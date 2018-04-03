@@ -21,14 +21,14 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(LinearSVC )
+pipeline_components.append('LinearSVC', LinearSVC ())
 
 
 C_values = np.random.uniform(low=1e-10, high=10., size=num_param_combinations)
@@ -37,10 +37,9 @@ penalty_values = np.random.choice(['l1', 'l2'], size=num_param_combinations)
 dual_values = np.random.choice([True, False], size=num_param_combinations)
 fit_intercept_values = np.random.choice([True, False], size=num_param_combinations)
 
-all_param_combinations = zip(C_values, loss_values, penalty_values, dual_values, fit_intercept_values)
-pipeline_parameters[LinearSVC] = \
-   [{'C': C, 'penalty': penalty, 'fit_intercept': fit_intercept, 'dual': dual, 'random_state': 324089}
-     for (C, loss, penalty, dual, fit_intercept) in all_param_combinations]
+pipeline_parameters['LinearSVC'] = \
+   {'C': C_values, 'penalty': penalty_values, 'fit_intercept': fit_intercept_values, 'dual': dual_values, 'random_state': 324089}
+     
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)

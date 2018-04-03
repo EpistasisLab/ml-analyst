@@ -21,14 +21,14 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(SGDClassifier )
+pipeline_components.append('SGDClassifier', SGDClassifier())
 
 
 loss_values = np.random.choice(['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'], size=num_param_combinations)
@@ -40,12 +40,12 @@ l1_ratio_values = np.random.uniform(low=0., high=1., size=num_param_combinations
 eta0_values = np.random.uniform(low=0., high=5., size=num_param_combinations)
 power_t_values = np.random.uniform(low=0., high=5., size=num_param_combinations)
 
-all_param_combinations = zip(loss_values, penalty_values, alpha_values, learning_rate_values, fit_intercept_values, l1_ratio_values, eta0_values, power_t_values)
-pipeline_parameters[SGDClassifier] = \
-   [{'loss': loss, 'penalty': penalty, 'alpha': alpha, 'learning_rate': learning_rate, 'fit_intercept': fit_intercept,
+pipeline_parameters['SGDClassifier'] = \
+   [{'loss': loss_values, 'penalty': penalty, 'alpha': alpha_values, 'learning_rate': learning_rate, 'fit_intercept': fit_intercept_values,
      'l1_ratio': 0.15 if penalty != 'elasticnet' else l1_ratio, 'eta0': 0. if learning_rate not in ['constant', 'invscaling'] else eta0,
      'power_t': 0.5 if learning_rate != 'invscaling' else power_t, 'random_state': 324089}
-     for (loss, penalty, alpha, learning_rate, fit_intercept, l1_ratio, eta0, power_t) in all_param_combinations]
+     for penalty, l1_ratio, learning_rate, eta0, power_t in zip(penalty_values, l1_ratio_values, learning_rate_values, eta0_values, power_t_values)]
+     
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)

@@ -21,25 +21,23 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(LogisticRegression )
+pipeline_components.append(('LogisticRegression', LogisticRegression(random_state=random_seed)))
 
 
 C_values = np.random.uniform(low=1e-10, high=10., size=num_param_combinations)
-penalty_values = np.random.choice(['l1', 'l2'], size=num_param_combinations)
-fit_intercept_values = np.random.choice([True, False], size=num_param_combinations)
-dual_values = np.random.choice([True, False], size=num_param_combinations)
+penalty_values = ['l1', 'l2']
+fit_intercept_values = [True, False]
+# dual_values = np.random.choice([True, False], size=num_param_combinations)
 
-all_param_combinations = zip(C_values, penalty_values, fit_intercept_values, dual_values)
-pipeline_parameters[LogisticRegression] = \
-   [{'C': C, 'penalty': penalty, 'fit_intercept': fit_intercept, 'dual': False if penalty != 'l2' else dual, 'random_state': 324089}
-     for (C, penalty, fit_intercept, dual) in all_param_combinations]
+pipeline_parameters['LogisticRegression'] = \
+    {'C': C_values, 'penalty': penalty_values, 'fit_intercept': fit_intercept_values}
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)

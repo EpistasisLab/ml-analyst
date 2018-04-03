@@ -25,22 +25,24 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
     cachedir = mkdtemp()
     memory = Memory(cachedir=cachedir, verbose=0)
 
-    print ( pipeline_components)
-    print(pipeline_parameters)
+    # print ( pipeline_components)
+    # print(pipeline_parameters)
     with warnings.catch_warnings():
         # Squash warning messages. Turn this off when debugging!
         #warnings.simplefilter('ignore')
+        cv = StratifiedKFold(n_splits=10, shuffle=True,random_state=random_state)
         hyperparameters = {}
         for k,v in pipeline_parameters.items():
             for param,pvals in v.items():
                 hyperparameters.update({k+'__'+param:pvals})
         pipeline =  Pipeline(pipeline_components, memory=memory)
         est = RandomizedSearchCV(estimator=pipeline, param_distributions = hyperparameters, n_iter = n_combos, 
-                             cv=StratifiedKFold(n_splits=10, shuffle=True), random_state=random_state, refit=True)
+                             cv=cv, random_state=random_state, refit=True,
+                             error_score=0.0)
         est.fit(features, labels)
         best_est = est.best_estimator_
-        cv_predictions = cross_val_predict(estimator=best_est, X=features, y=labels, cv=StratifiedKFold(n_splits=10, 
-                    shuffle=True, random_state=random_state))
+        
+        cv_predictions = cross_val_predict(estimator=best_est, X=features, y=labels, cv=cv)
         # get cv probabilities
         skip = False
         if getattr(best_est, "predict_proba", None):
@@ -109,8 +111,8 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
                                                      for parameter, value in pipeline_parameters[preprocessor_class].items()])
 
         classifier_class = pipeline_components[-1][0]
-        param_string = ','.join(['{}={}'.format(parameter, value)
-                                for parameter, value in pipeline_parameters[classifier_class].items()])
+        param_string = ','.join(['{}={}'.format(p, v) for p,v in est.best_params_.items()])
+                                # for parameter, value in pipeline_parameters[classifier_class].items()])
 
         out_text = '\t'.join([dataset.split('/')[-1].split('.')[0],
                               ','.join(preprocessor_classes),

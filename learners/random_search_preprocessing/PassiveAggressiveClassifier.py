@@ -21,24 +21,23 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(PassiveAggressiveClassifier )
+pipeline_components.append('PassiveAggressiveClassifier', PassiveAggressiveClassifier())
 
 
 C_values = np.random.uniform(low=1e-10, high=10., size=num_param_combinations)
 loss_values = np.random.choice(['hinge', 'squared_hinge'], size=num_param_combinations)
 fit_intercept_values = np.random.choice([True, False], size=num_param_combinations)
 
-all_param_combinations = zip(C_values, loss_values, fit_intercept_values)
 pipeline_parameters[PassiveAggressiveClassifier] = \
-   [{'C': C, 'loss': loss, 'fit_intercept': fit_intercept, 'random_state': 324089}
-     for (C, loss, fit_intercept) in all_param_combinations]
+   {'C': C_values, 'loss': loss_values, 'fit_intercept': fit_intercept, 'random_state': 324089}
+     
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)

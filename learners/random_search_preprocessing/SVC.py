@@ -21,14 +21,14 @@ np.random.seed(random_seed)
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
-    pipeline_components.append(preprocessor_dict[p])
-    if pipeline_components[-1] is SelectFromModel:
-        pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
-    elif pipeline_components[-1] is RFE:
-        pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    pipeline_components.append((p, preprocessor_dict[p]))
+    # if pipeline_components[-1] is SelectFromModel:
+    #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
+    # elif pipeline_components[-1] is RFE:
+    #     pipeline_parameters[RFE] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
 
-pipeline_components.append(SVC )
+pipeline_components.append(('SVC', SVC(random_state=random_seed)))
 
 
 C_values = np.random.uniform(low=1e-10, high=500., size=num_param_combinations)
@@ -37,10 +37,9 @@ kernel_values = np.random.choice(['poly', 'rbf', 'sigmoid'], size=num_param_comb
 degree_values = np.random.choice([2, 3], size=num_param_combinations)
 coef0_values = np.random.uniform(low=0., high=10., size=num_param_combinations)
 
-all_param_combinations = zip(C_values, gamma_values, kernel_values, degree_values, coef0_values)
-pipeline_parameters[SVC] = \
-   [{'C': C, 'gamma': float(gamma) if gamma != 'auto' else gamma, 'kernel': str(kernel), 'degree': 2 if kernel != 'poly' else degree, 'coef0': 0. if kernel not in ['poly', 'sigmoid'] else coef0, 'random_state': 324089}
-     for (C, gamma, kernel, degree, coef0) in all_param_combinations]
+pipeline_parameters['SVC'] = \
+   {'C': C_values, 'gamma': [float(gamma) if gamma != 'auto' else gamma for gamma in gamma_values], 'kernel': kernel_values, 
+    'degree': degree_values, 'coef0': coef0_values}
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)
