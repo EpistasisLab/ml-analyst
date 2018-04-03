@@ -20,7 +20,9 @@ def main():
     # dataset = args.NAME
     # dataset = args.NAME.split('/')[-1].split('.')[0] 
     # run_dir = 'results/' + dataset + '/' 
-    run_dir = '/'.join(args.RUN_DIR.split('/'))+'/'
+    run_dir = args.RUN_DIR
+    if run_dir[-1] != '/': 
+        run_dir += '/'
     dataset = run_dir.split('/')[-2]
     print('dataset:',dataset)
     print('loading data from',run_dir)

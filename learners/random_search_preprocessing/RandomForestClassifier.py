@@ -30,7 +30,7 @@ for p in preps.split(','):
     # elif p is 'RFE':
     #     pipeline_parameters[p] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
 
-pipeline_components.append(('RandomForestClassifier',RandomForestClassifier()))
+pipeline_components.append(('RandomForestClassifier',RandomForestClassifier(class_weight='balanced')))
 
 # parameters for method
 n_estimators= list(range(50, 1001, 50))

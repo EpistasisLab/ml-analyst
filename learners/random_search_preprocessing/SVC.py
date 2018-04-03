@@ -33,8 +33,8 @@ pipeline_components.append(('SVC', SVC(random_state=random_seed)))
 
 C_values = np.random.uniform(low=1e-10, high=500., size=num_param_combinations)
 gamma_values = np.random.choice(list(np.arange(0.05, 1.01, 0.05)) + ['auto'], size=num_param_combinations)
-kernel_values = np.random.choice(['poly', 'rbf', 'sigmoid'], size=num_param_combinations)
-degree_values = np.random.choice([2, 3], size=num_param_combinations)
+kernel_values = ['poly', 'rbf', 'sigmoid']
+degree_values = [2, 3]
 coef0_values = np.random.uniform(low=0., high=10., size=num_param_combinations)
 
 pipeline_parameters['SVC'] = \

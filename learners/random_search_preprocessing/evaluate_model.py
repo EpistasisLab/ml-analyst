@@ -17,7 +17,6 @@ import pdb
 def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeline_parameters, n_combos):
 
     features, labels, feature_names = read_file(dataset)
-
     # pipelines = [dict(zip(pipeline_parameters.keys(), list(parameter_combination)))
     #              for parameter_combination in itertools.product(*pipeline_parameters.values())]
 
@@ -29,7 +28,7 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
     # print(pipeline_parameters)
     with warnings.catch_warnings():
         # Squash warning messages. Turn this off when debugging!
-        #warnings.simplefilter('ignore')
+        warnings.simplefilter('ignore')
         cv = StratifiedKFold(n_splits=10, shuffle=True,random_state=random_state)
         hyperparameters = {}
         for k,v in pipeline_parameters.items():
@@ -53,8 +52,7 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
             skip = True
     
         if not skip:
-            cv_probabilities = cross_val_predict(estimator=best_est, X=features, y=labels, method=method, 
-                                                cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=random_state))
+            cv_probabilities = cross_val_predict(estimator=best_est, X=features, y=labels, method=method, cv=cv)
             if method == "predict_proba":
                 cv_probabilities = cv_probabilities[:,1]
 
