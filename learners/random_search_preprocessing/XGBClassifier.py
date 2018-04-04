@@ -2,9 +2,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-from sklearn.feature_selection import SelectFromModel, RFE
-from sklearn.ensemble import ExtraTreesClassifier
-
 from xgboost import XGBClassifier # Assumes XGBoost v0.6
 from evaluate_model import evaluate_model
 from preprocessors import preprocessor_dict

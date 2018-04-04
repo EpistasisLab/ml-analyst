@@ -65,7 +65,6 @@ def main():
 
     df = pd.concat(frames, join='outer', ignore_index=True)
     df['prep_alg'] = df['preprocessor'] + '_' + df['algorithm']
-    # pdb.set_trace()
     print('loaded',count,'feature importance files with results from these learners:',df['prep_alg'].unique())
 
     dfp =  df.groupby(['prep_alg','feature']).median().unstack('prep_alg')
@@ -88,26 +87,65 @@ def main():
     
     print('loaded',count,'roc files with results from these learners:',df['prep_alg'].unique())
 
-
-    plt.figure()
-    plt.plot([0, 1],[0, 1],'--k')
+    h, ax = plt.subplots()
+    ax.plot([0, 1],[0, 1],'--k',label='_nolegend_')
     colors = ('r','y','b','g','c','k')
+    colors = plt.cm.Spectral(np.linspace(0.1, 0.9, len(df['prep_alg'].unique())))
+
     n_algs = len(df['prep_alg'].unique())
     for i, (alg,df_g) in enumerate(df.groupby('prep_alg')):
-    
+   
+        aucs = df_g.auc.values
+        seed_max = df_g.loc[df_g.auc.idxmax()]['seed']
+        seed_min = df_g.loc[df_g.auc.idxmin()]['seed']
+
         auc = df_g.auc.median()
-        tpr  = [df_g.tpr.values[s] for s in np.argsort(df_g.fpr.values)]
-        fpr = np.sort(df_g.fpr)
-        plt.plot(fpr, tpr, label='{:s} (AUC = {:0.2f})'
-                   ''.format(alg,auc),
-                   color=colors[i % n_algs], linestyle=':', linewidth=1)
+        # fpr = df_g['fpr'].unique()
+        tprs,fprs=[],[]
+        fpr_min = df_g.loc[df_g.seed == seed_min,:]['fpr']
+        fpr_max = df_g.loc[df_g.seed == seed_max,:]['fpr']
+        tpr_min = df_g.loc[df_g.seed == seed_min,:]['tpr']
+        tpr_max = df_g.loc[df_g.seed == seed_max,:]['tpr']
+        
+        ax.plot(fpr_max,tpr_max, color=colors[i % n_algs], linestyle='--', linewidth=1,
+                label='_nolegend_')
+        ax.plot(fpr_min,tpr_min,color=colors[i % n_algs], linestyle='--', linewidth=1,
+                label='{:s} (AUC = {:0.2f})'.format(alg,auc))
+        # for seed,df_g_s in df_g.groupby('seed'):
+        #     tprs.append(df_g_s['tpr'].values)
+        #     fprs.append(df_g_s['fpr'].values)
+        # print('tprs list:',len(tprs),[t.shape for t in tprs])        
+        # print('fprs list:',len(fprs),[f.shape for f in fprs])        
+        # tprs = np.array(tprs)
+        # fprs = np.array(fprs)
+        # print('tprs',tprs.shape,'fprs',fprs.shape)
+        # fpr = np.mean(fprs,axis=1)
+        # tpr = np.mean(tprs,axis=1)
+        # tpr_std = np.std(tprs,axis=1)
+        # # for f,t in zip(fprs,tprs):
+        # ax.plot(fpr,tpr, label='{:s} (AUC = {:0.2f})'.format(alg,auc))
+        # print('fpr size:',len(fpr))
+        # print('fpr:',fpr)
+        # tpr = df_g.groupby('fpr')['tpr'].mean().values
+        # tpr_std = df_g.groupby('fpr')['tpr'].std().values
+        # print('tpr size:',len(tpr))
+        # print('tpr:',tpr)
+
+        # tpr  = np.array([tpr[s] for s in np.argsort(fpr)])
+        # tpr_std  = np.array([tpr_std[s] for s in np.argsort(fpr)])
+        # fpr = np.sort(fpr)
+        # ax.plot(fpr,tpr+tpr_std)
+        # ax.fill_between(fpr, tpr+tpr_std, tpr-tpr_std, alpha=0.1,
+        #            label='{:s} (AUC = {:0.2f})'
+        #            ''.format(alg,auc),
+        #            color=colors[i % n_algs], linestyle=':', linewidth=1)
 
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     leg = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.ylim(0,1)
     plt.xlim(0,1)
-    plt.savefig(run_dir + '_'.join([ dataset, col,'roc_curves.pdf']),bbox_extra_artists=(leg,h), bbox_inches='tight')
+    plt.savefig(run_dir + '_'.join([ dataset, col,'roc_curves.pdf']), bbox_inches='tight')
 
     print('done!')    
 

@@ -81,9 +81,9 @@ if __name__ == '__main__':
    
         with open(save_file,'w') as out:
             if args.PREP:
-                out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\taccuracy\tf1_macro\tbal_accuracy\n')
+                out.write('dataset\tpreprocessor\tprep-parameters\talgorithm\talg-parameters\tseed\taccuracy\tf1_macro\tbal_accuracy\troc_auc\n')
             else:
-                out.write('dataset\talgorithm\tparameters\taccuracy\tf1_macro\tseed\tbal_accuracy\n')
+                out.write('dataset\talgorithm\tparameters\taccuracy\tf1_macro\tseed\tbal_accuracy\troc_auc\n')
         
     # write run commands
     all_commands = []
