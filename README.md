@@ -15,7 +15,7 @@ python analyze.py path/to/dataset -ml LogisticRegression,RandomForestClassifier,
 > I want to tune the parameters of each method using 100 combinations, and run 10 shuffles of the data.   
 
 ```python
-python analyze.py path/to/dataset -ml LogisticRegression,RandomForestClassifier,MLPClassifier -prep RobustScaler 
+python analyze.py path/to/dataset -ml LogisticRegression,RandomForestClassifier,MLPClassifier -prep RobustScaler -n_combos 100 -n_trials 10
 ```
 
 > what other options are there?
