@@ -44,7 +44,8 @@ def compute_imp_score(model, model_name, training_features, training_classes, ra
         coefs = perm.feature_importances_
 
     
-    return (coefs-np.min(coefs))/(np.max(coefs)-np.min(coefs))
+    #return (coefs-np.min(coefs))/(np.max(coefs)-np.min(coefs))
+    return coefs/np.sum(coefs)
 
 # def plot_imp_score(save_file, coefs, feature_names, seed):
 #     # plot bar charts for top 10 importanct features
