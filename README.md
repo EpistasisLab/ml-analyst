@@ -26,5 +26,5 @@ python analyze.py -h
 ## generating comparisons
 
 ```python
-python compare.py path/to/dataset 
+python compare.py path/to/results 
 ```
