@@ -15,12 +15,14 @@ save_file = sys.argv[2]
 num_param_combinations = int(sys.argv[3])
 random_seed = int(sys.argv[4])
 preps = sys.argv[5]
+label = sys.argv[6]
 np.random.seed(random_seed)
 
 # construct pipeline
 pipeline_components=[]
 pipeline_parameters={}
 for p in preps.split(','):
+    label = sys.argv[6]
     pipeline_components.append((p, preprocessor_dict[p]))
     # if pipeline_components[-1] is SelectFromModel:
     #     pipeline_parameters[SelectFromModel] = [{'estimator': ExtraTreesClassifier(n_estimators=100, random_state=324089)}]
@@ -39,4 +41,4 @@ pipeline_parameters['AdaBoostClassifier'] = {'learning_rate': learning_rate_valu
 
 
 #evaluate
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations, label, label)

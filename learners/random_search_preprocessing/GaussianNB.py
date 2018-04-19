@@ -14,6 +14,7 @@ save_file = sys.argv[2]
 num_param_combinations = int(sys.argv[3])
 random_seed = int(sys.argv[4])
 preps = sys.argv[5]
+label = sys.argv[6]
 
 np.random.seed(random_seed)
 
@@ -33,4 +34,4 @@ pipeline_components.append('GaussianNB', GaussianNB ())
 pipeline_parameters['GaussianNB'] = {}
 
 
-evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations)
+evaluate_model(dataset, save_file, random_seed, pipeline_components, pipeline_parameters, num_param_combinations, label)

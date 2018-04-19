@@ -36,7 +36,8 @@ if __name__ == '__main__':
             help='Number of hyperparameters to try')
     parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,
             help='random state')
-    
+    parser.add_argument('-label',action='store',dest='LABEL',default='class',type=str,help='Name of class label column')
+
     args = parser.parse_args()
       
     if args.RANDOM_STATE:
@@ -96,7 +97,7 @@ if __name__ == '__main__':
                 save_file = results_path + '_' + ml + '.csv'          
             
             if args.PREP: 
-                all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP)) 
+                all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP} {LABEL}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP,LABEL=args.LABEL)) 
             else :
                 all_commands.append('python {ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state))
 

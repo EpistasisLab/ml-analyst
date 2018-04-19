@@ -14,9 +14,9 @@ from read_file import read_file
 from utils import feature_importance , roc
 import pdb
 
-def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeline_parameters, n_combos):
+def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeline_parameters, n_combos, label):
 
-    features, labels, feature_names = read_file(dataset)
+    features, labels, feature_names = read_file(dataset, label)
     # pipelines = [dict(zip(pipeline_parameters.keys(), list(parameter_combination)))
     #              for parameter_combination in itertools.product(*pipeline_parameters.values())]
 
