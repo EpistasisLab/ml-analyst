@@ -9,6 +9,22 @@ def feature_importance(save_file, model, model_name, feature_names, training_fea
                        preps, prep_params, clf_name, clf_params):
     """ prints feature importance information for a trained estimator (model)"""
     coefs = compute_imp_score(model, model_name, training_features, training_classes, random_state)
+    
+    if len(coefs) < len(feature_names): # there must be a feature selection strategy
+        name = [k for k,v in model.named_steps.items() if getattr(v,'get_support',None)][0]
+        print('name:',name) 
+        fn = np.asarray(feature_names)
+        sel_feature_names = fn[model.named_steps[name].get_support()]
+        j = 0
+        new_coefs=np.zeros(fn.shape)
+        for i,f in enumerate(feature_names):
+            if f in sel_feature_names:
+                new_coefs[i] = coefs[j]
+                j = j+1
+            else:
+                new_coefs[i] = 0
+    coefs = new_coefs
+    assert(len(coefs)==len(feature_names))
 #    plot_imp_score(save_file, coefs, feature_names, random_state)
 
     out_text=''

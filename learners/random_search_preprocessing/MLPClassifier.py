@@ -35,6 +35,7 @@ pipeline_components.append(('MLPClassifier',MLPClassifier()))
 
 # parameters for method
 hidden_layer_sizes = [(n_layers,n_nodes) for n_layers in np.arange(1,10) for n_nodes in np.arange(10,100,10)]
+print(hidden_layer_sizes)
 activation = ['identity','logistic','tanh','relu']
 solver = ['lbfgs', 'sgd', 'adam']
 

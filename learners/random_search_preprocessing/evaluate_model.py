@@ -35,13 +35,16 @@ def evaluate_model(dataset, save_file, random_state, pipeline_components, pipeli
             for param,pvals in v.items():
                 hyperparameters.update({k+'__'+param:pvals})
         pipeline =  Pipeline(pipeline_components, memory=memory)
+
+        # run Randomized Search CV to tune the hyperparameter settings
         est = RandomizedSearchCV(estimator=pipeline, param_distributions = hyperparameters, n_iter = n_combos, 
                              cv=cv, random_state=random_state, refit=True,
                              error_score=0.0)
         est.fit(features, labels)
         best_est = est.best_estimator_
-        
+        # generate cross-validated predictions for each data point using the best estimator 
         cv_predictions = cross_val_predict(estimator=best_est, X=features, y=labels, cv=cv)
+
         # get cv probabilities
         skip = False
         if getattr(best_est, "predict_proba", None):
