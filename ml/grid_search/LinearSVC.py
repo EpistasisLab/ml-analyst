@@ -7,6 +7,8 @@ from sklearn.svm import LinearSVC
 from evaluate_model import evaluate_model
 
 dataset = sys.argv[1]
+save_file = sys.argv[2]
+random_seed = int(sys.argv[3])
 
 pipeline_components = [RobustScaler, LinearSVC]
 pipeline_parameters = {}
@@ -16,11 +18,11 @@ loss_values = ['hinge', 'squared_hinge']
 penalty_values = ['l1', 'l2']
 dual_values = [True, False]
 fit_intercept_values = [True, False]
-random_state = [324089]
+random_state = [random_seed] 
 
 all_param_combinations = itertools.product(C_values, loss_values, penalty_values, dual_values, fit_intercept_values, random_state)
 pipeline_parameters[LinearSVC] = \
    [{'C': C, 'penalty': penalty, 'fit_intercept': fit_intercept, 'dual': dual, 'random_state': random_state}
      for (C, loss, penalty, dual, fit_intercept, random_state) in all_param_combinations]
 
-evaluate_model(dataset, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, pipeline_components, pipeline_parameters, save_file, random_seed)

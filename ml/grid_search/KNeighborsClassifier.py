@@ -7,6 +7,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from evaluate_model import evaluate_model
 
 dataset = sys.argv[1]
+save_file = sys.argv[2]
+random_seed = int(sys.argv[3])
 
 pipeline_components = [RobustScaler, KNeighborsClassifier]
 pipeline_parameters = {}

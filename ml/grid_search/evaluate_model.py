@@ -7,11 +7,13 @@ from sklearn.pipeline import make_pipeline
 from tpot_metrics import balanced_accuracy_score
 import warnings
 
-def evaluate_model(dataset, pipeline_components, pipeline_parameters):
-    input_data = pd.read_csv(dataset, compression='gzip', sep='\t')
+def evaluate_model(dataset, pipeline_components, pipeline_parameters, save_file, random_state):
+    compression = 'gzip' if '.gz' in dataset else None
+    input_data = pd.read_csv(dataset, compression=compression, engine='python', sep=None)
     features = input_data.drop('class', axis=1).values.astype(float)
     labels = input_data['class'].values
-
+    # features, labels, feature_names = read_file(dataset, label)
+    
     pipelines = [dict(zip(pipeline_parameters.keys(), list(parameter_combination)))
                  for parameter_combination in itertools.product(*pipeline_parameters.values())]
 
@@ -30,7 +32,8 @@ def evaluate_model(dataset, pipeline_components, pipeline_parameters):
 
             try:
                 clf = make_pipeline(*pipeline)
-                cv_predictions = cross_val_predict(estimator=clf, X=features, y=labels, cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=90483257))
+                cv_predictions = cross_val_predict(estimator=clf, X=features, y=labels,
+                        cv=StratifiedKFold(n_splits=10, shuffle=True, random_state=random_state))
                 accuracy = accuracy_score(labels, cv_predictions)
                 macro_f1 = f1_score(labels, cv_predictions, average='macro')
                 balanced_accuracy = balanced_accuracy_score(labels, cv_predictions)
@@ -53,4 +56,7 @@ def evaluate_model(dataset, pipeline_components, pipeline_parameters):
                                 str(balanced_accuracy)])
 
             print(out_text)
+            with open(save_file, 'a') as out:
+                out.write(out_text+'\n')
+
             sys.stdout.flush()

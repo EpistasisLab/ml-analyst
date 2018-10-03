@@ -7,6 +7,8 @@ from sklearn.naive_bayes import MultinomialNB
 from evaluate_model import evaluate_model
 
 dataset = sys.argv[1]
+save_file = sys.argv[2]
+random_seed = int(sys.argv[3])
 
 pipeline_components = [MinMaxScaler, MultinomialNB]
 pipeline_parameters = {}

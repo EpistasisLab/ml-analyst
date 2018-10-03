@@ -7,15 +7,17 @@ from sklearn.ensemble import RandomForestClassifier
 from evaluate_model import evaluate_model
 
 dataset = sys.argv[1]
+save_file = sys.argv[2]
+random_seed = int(sys.argv[3])
 
 pipeline_components = [RobustScaler, RandomForestClassifier]
 pipeline_parameters = {}
 
-n_estimators_values = [10, 50, 100, 500]
-min_impurity_decrease_values = np.arange(0., 0.005, 0.00025)
-max_features_values = [0.1, 0.25, 0.5, 0.75, 'sqrt', 'log2', None]
+n_estimators_values = [10, 100, 500]
+min_impurity_decrease_values = np.arange(0., 0.005, 0.001)
+max_features_values = ['sqrt', 'log2', None]
 criterion_values = ['gini', 'entropy']
-random_state = [324089]
+random_state = [random_seed] 
 
 all_param_combinations = itertools.product(n_estimators_values, min_impurity_decrease_values, max_features_values, criterion_values, random_state)
 pipeline_parameters[RandomForestClassifier] = \

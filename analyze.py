@@ -15,8 +15,8 @@ if __name__ == '__main__':
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
     parser.add_argument('-ml', action='store', dest='LEARNERS',default=None,type=str, 
-            help='Comma-separated list of ML methods to use (should correspond to a py file name in
-            ml/)')
+            help='Comma-separated list of ML methods to use (should correspond to a py file name '
+                 'in ml/)')
     parser.add_argument('-prep', action='store', dest='PREP', default=None, type=str, 
             help = 'Comma-separated list of preprocessors to apply to data')
     parser.add_argument('--lsf', action='store_true', dest='LSF', default=False, 
@@ -37,14 +37,22 @@ if __name__ == '__main__':
             help='Number of hyperparameters to try')
     parser.add_argument('-rs',action='store',dest='RANDOM_STATE',default=None,type=int,
             help='random state')
-    parser.add_argument('-label',action='store',dest='LABEL',default='class',type=str,help='Name of class label column')
+    parser.add_argument('-label',action='store',dest='LABEL',default='class',type=str,
+            help='Name of class label column')
+    parser.add_argument('-m',action='store',dest='M',default=4096,type=int,
+                        help='LSF memory request and limit (MB)')
+    parser.add_argument('-results',action='store',dest='RDIR',default='results',type=str,
+                        help='results directory')
+    parser.add_argument('-q',action='store',dest='QUEUE',default='moore_normal',type=str,
+                        help='results directory')
+
 
     args = parser.parse_args()
-      
+     
     if args.RANDOM_STATE:
         random_state = args.RANDOM_STATE
     else:
-        random_state = np.random.randint(2**32 - 1)
+        random_state = np.random.randint(2**15 - 1)
 
     learners = [ml for ml in args.LEARNERS.split(',')]  # learners
 
@@ -56,9 +64,9 @@ if __name__ == '__main__':
     else:
         model_dir= 'ml/grid_search/' 
 
-    dataset = args.INPUT_FILE.split('/')[-1].split('.')[0]
+    dataset = args.INPUT_FILE.split('/')[-1].split('.csv')[0]
     RANDOM_STATE = args.RANDOM_STATE
-    results_path = '/'.join(['results', dataset]) + '/'
+    results_path = '/'.join([args.RDIR, dataset]) + '/'
     # make the results_path directory if it doesn't exit 
     try:
         os.makedirs(results_path)
@@ -71,7 +79,8 @@ if __name__ == '__main__':
         if args.PREP:
             save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
         else:
-            save_file = results_path + '_' + ml + '.csv'  
+            save_file = results_path + '/' + dataset + '_' + ml + '.csv'  
+
         feat_file =  save_file.split('.')[0]+'.imp_score'        
         roc_file =  save_file.split('.')[0]+'.roc'        
         
@@ -89,31 +98,37 @@ if __name__ == '__main__':
         
     # write run commands
     all_commands = []
+    job_info=[]
     for t in range(args.N_TRIALS):
-        random_state = np.random.randint(2**32-1)
+        random_state = np.random.randint(2**15-1)
         for ml in learners:
             if args.PREP:
                 save_file = results_path + '-'.join(args.PREP.split(',')) + '_' + ml + '.csv'  
             else:
-                save_file = results_path + '_' + ml + '.csv'          
+                save_file = results_path + '/' + dataset + '_' + ml + '.csv'  
             
             if args.PREP: 
                 all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS} {PREP} {LABEL}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state,PREP=args.PREP,LABEL=args.LABEL)) 
-            else :
-                all_commands.append('python {ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state))
+            elif args.SEARCH == 'random':
+                all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {N_COMBOS} {RS}'.format(PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,SAVEFILE=save_file,N_COMBOS=args.N_COMBOS,RS=random_state))
+            else:
+                all_commands.append('python {PATH}/{ML}.py {DATASET} {SAVEFILE} {RS}'.format(
+                                    PATH=model_dir,ML=ml,DATASET=args.INPUT_FILE,
+                                    SAVEFILE=save_file,RS=random_state)
+                                   )
+            job_info.append({'ml':ml,'dataset':dataset,'results_path':results_path})
 
     if args.LSF:    # bsub commands
-        for run_cmd in all_commands:
-            job_name = ml + '_' + dataset
-            out_file = results_path + job_name + '_%J.out'
-            error_file = out_file[:-4] + '.err'
-            
-            bsub_cmd = ('bsub -o {OUT_FILE} -e {ERROR_FILE} -n {N_CORES} -J {JOB_NAME} -q {QUEUE} '
-                       '-R "span[hosts=1]" ').format(OUT_FILE=out_file,
-                                             ERROR_FILE=error_file,
+        for i,run_cmd in enumerate(all_commands):
+            job_name = job_info[i]['ml'] + '_' + job_info[i]['dataset']
+            out_file = job_info[i]['results_path'] + job_name + '_%J.out'
+
+            bsub_cmd = ('bsub -o {OUT_FILE} -n {N_CORES} -J {JOB_NAME} -q {QUEUE} '
+                       '-R "span[hosts=1] rusage[mem={M}]" -M {M} ').format(OUT_FILE=out_file,
                                              JOB_NAME=job_name,
                                              QUEUE=args.QUEUE,
-                                             N_CORES=n_cores)
+                                             N_CORES=args.N_JOBS,
+                                             M=args.M)
             
             bsub_cmd +=  '"' + run_cmd + '"'
             print(bsub_cmd)
