@@ -15,7 +15,8 @@ if __name__ == '__main__':
     parser.add_argument('-h', '--help', action='help',
                         help='Show this help message and exit.')
     parser.add_argument('-ml', action='store', dest='LEARNERS',default=None,type=str, 
-            help='Comma-separated list of ML methods to use (should correspond to a py file name in learners/)')
+            help='Comma-separated list of ML methods to use (should correspond to a py file name in
+            ml/)')
     parser.add_argument('-prep', action='store', dest='PREP', default=None, type=str, 
             help = 'Comma-separated list of preprocessors to apply to data')
     parser.add_argument('--lsf', action='store_true', dest='LSF', default=False, 
@@ -49,11 +50,11 @@ if __name__ == '__main__':
 
     if args.SEARCH == 'random':
         if args.PREP:
-            model_dir = 'learners/random_search_preprocessing/'
+            model_dir = 'ml/random_search_preprocessing/'
         else:
-            model_dir = 'learners/random_search/'
+            model_dir = 'ml/random_search/'
     else:
-        model_dir= 'learners/grid_search/' 
+        model_dir= 'ml/grid_search/' 
 
     dataset = args.INPUT_FILE.split('/')[-1].split('.')[0]
     RANDOM_STATE = args.RANDOM_STATE
