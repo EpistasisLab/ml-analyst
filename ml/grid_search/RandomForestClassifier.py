@@ -24,4 +24,4 @@ pipeline_parameters[RandomForestClassifier] = \
    [{'n_estimators': n_estimators, 'min_impurity_decrease': min_impurity_decrease, 'max_features': max_features, 'criterion': criterion, 'random_state': random_state}
      for (n_estimators, min_impurity_decrease, max_features, criterion, random_state) in all_param_combinations]
 
-evaluate_model(dataset, pipeline_components, pipeline_parameters)
+evaluate_model(dataset, pipeline_components, pipeline_parameters, save_file, random_seed)
